@@ -1,4 +1,4 @@
-package com.poecat;
+package com.poecat.inbox;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
