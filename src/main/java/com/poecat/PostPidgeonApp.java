@@ -1,6 +1,10 @@
 package com.poecat;
 
+import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.poecat.inbox.DataStaxAstraProperties;
+import com.poecat.inbox.emaillist.EmailListItem;
+import com.poecat.inbox.emaillist.EmailListItemKey;
+import com.poecat.inbox.emaillist.EmailListItemRepository;
 import com.poecat.inbox.folders.Folder;
 import com.poecat.inbox.folders.FolderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.PostConstruct;
 import java.nio.file.Path;
+import java.util.Arrays;
 
 @SpringBootApplication
 @RestController
@@ -24,6 +29,8 @@ public class PostPidgeonApp {
 
 	@Autowired
 	FolderRepository folderRepository;
+	@Autowired
+	EmailListItemRepository emailListItemRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PostPidgeonApp.class, args);
@@ -46,5 +53,20 @@ public class PostPidgeonApp {
 		folderRepository.save(new Folder("poe-cat", "Inbox", "blue"));
 		folderRepository.save(new Folder("poe-cat", "Sent", "green"));
 		folderRepository.save(new Folder("poe-cat", "Important", "yellow"));
+
+		for(int i = 0; i < 10; i++) {
+			EmailListItemKey key = new EmailListItemKey();
+			key.setId("poe-cat");
+			key.setLabel("Inbox");
+			key.setTimeUUID(Uuids.timeBased());
+
+			EmailListItem item = new EmailListItem();
+			item.setKey(key);
+			item.setTo(Arrays.asList("poe-cat"));
+			item.setSubject("Subject " + i);
+			item.setUnread(true);
+
+			emailListItemRepository.save(item);
+		}
 	}
 }
