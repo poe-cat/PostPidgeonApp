@@ -2,6 +2,8 @@ package com.poecat;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.poecat.inbox.DataStaxAstraProperties;
+import com.poecat.inbox.email.Email;
+import com.poecat.inbox.email.EmailRepository;
 import com.poecat.inbox.emaillist.EmailListItem;
 import com.poecat.inbox.emaillist.EmailListItemKey;
 import com.poecat.inbox.emaillist.EmailListItemRepository;
@@ -31,6 +33,8 @@ public class PostPidgeonApp {
 	FolderRepository folderRepository;
 	@Autowired
 	EmailListItemRepository emailListItemRepository;
+	@Autowired
+	EmailRepository emailRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PostPidgeonApp.class, args);
@@ -62,11 +66,20 @@ public class PostPidgeonApp {
 
 			EmailListItem item = new EmailListItem();
 			item.setKey(key);
-			item.setTo(Arrays.asList("poe-cat"));
+			item.setTo(Arrays.asList("poe-cat", "abc", "def"));
 			item.setSubject("Subject " + i);
 			item.setUnread(true);
 
 			emailListItemRepository.save(item);
+
+			Email email = new Email();
+			email.setId(key.getTimeUUID());
+			email.setFrom("poe-cat");
+			email.setSubject(item.getSubject());
+			email.setBody("Body " + i);
+			email.setTo(item.getTo());
+
+			emailRepository.save(email);
 		}
 	}
 }
