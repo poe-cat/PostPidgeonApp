@@ -9,6 +9,7 @@ import com.poecat.inbox.emaillist.EmailListItemKey;
 import com.poecat.inbox.emaillist.EmailListItemRepository;
 import com.poecat.inbox.folders.Folder;
 import com.poecat.inbox.folders.FolderRepository;
+import com.poecat.inbox.folders.UnreadEmailStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,6 +36,8 @@ public class PostPidgeonApp {
 	EmailListItemRepository emailListItemRepository;
 	@Autowired
 	EmailRepository emailRepository;
+	@Autowired
+	UnreadEmailStatsRepository unreadEmailStatsRepository;
 
 	public static void main(String[] args) {
 		SpringApplication.run(PostPidgeonApp.class, args);
@@ -57,6 +60,10 @@ public class PostPidgeonApp {
 		folderRepository.save(new Folder("poe-cat", "Inbox", "blue"));
 		folderRepository.save(new Folder("poe-cat", "Sent", "green"));
 		folderRepository.save(new Folder("poe-cat", "Important", "yellow"));
+
+		unreadEmailStatsRepository.incrementUnreadCount("poe-cat", "Inbox");
+		unreadEmailStatsRepository.incrementUnreadCount("poe-cat", "Inbox");
+		unreadEmailStatsRepository.incrementUnreadCount("poe-cat", "Inbox");
 
 		for(int i = 0; i < 10; i++) {
 			EmailListItemKey key = new EmailListItemKey();
