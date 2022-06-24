@@ -36,18 +36,18 @@ public class EmailService {
             unreadEmailStatsRepository.incrementUnreadCount(toId, "Inbox");
         });
 
-        EmailListItem sentItemsEntry = createEmailListItem(to, subject, email, from, "SentItems");
+        EmailListItem sentItemsEntry = createEmailListItem(to, subject, email, from, "Sent items");
         sentItemsEntry.setUnread(false);
         emailListItemRepository.save(sentItemsEntry);
     }
 
 
     private EmailListItem createEmailListItem(List<String> to, String subject,
-                                              Email email, String itemOwner, String folder) {
+                                              Email email, String itemOwner, String folderName) {
 
         EmailListItemKey key = new EmailListItemKey();
         key.setId(itemOwner);
-        key.setLabel(folder);
+        key.setLabel(folderName);
         key.setTimeUUID(email.getId());
 
         EmailListItem item = new EmailListItem();

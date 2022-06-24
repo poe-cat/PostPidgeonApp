@@ -19,6 +19,7 @@
     <style>
         .container {
           display: grid;
+          margin-top: 20px;
 
           grid-template-areas:
             "header header header"
@@ -59,7 +60,11 @@
 
 <div class="container">
     <header>
-        <h1>Hello, Name</h1>
+        <h3>
+            Your Post Pidgeon
+            <small class="text-muted">Welcome, </small>
+            <small class="text-muted" th:text="${userName}">User name</small>
+        </h3>
     </header>
 
     <nav>
@@ -80,7 +85,7 @@
                     <div class="mb-3">
                         <label for="toIds" class="form-label">To</label>
                         <input type="text" th:value="${toIds}" class="form-control" name="toIds" id="toIds" aria-describedby="emailHelp">
-                        <div id="toIdHelp" class="form-text">Enter comma separated GitHub IDs of your recepients.</div>
+                        <div id="toIdHelp" class="form-text">Enter comma separated GitHub IDs of your recipients.</div>
                     </div>
                     <div class="mb-3">
                         <label for="subject" class="form-label">Subject</label>
