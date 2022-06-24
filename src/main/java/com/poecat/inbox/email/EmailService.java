@@ -4,6 +4,7 @@ import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.poecat.inbox.emaillist.EmailListItem;
 import com.poecat.inbox.emaillist.EmailListItemKey;
 import com.poecat.inbox.emaillist.EmailListItemRepository;
+import com.poecat.inbox.folders.UnreadEmailStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,8 @@ public class EmailService {
     private EmailRepository emailRepository;
     @Autowired
     private EmailListItemRepository emailListItemRepository;
+    @Autowired
+    private UnreadEmailStatsRepository unreadEmailStatsRepository;
 
     public void sendEmail(String from, List<String> to, String subject, String body) {
 
@@ -30,9 +33,11 @@ public class EmailService {
         to.forEach(toId -> {
             EmailListItem item = createEmailListItem(to, subject, email, toId, "Inbox");
             emailListItemRepository.save(item);
+            unreadEmailStatsRepository.incrementUnreadCount(toId, "Inbox");
         });
 
         EmailListItem sentItemsEntry = createEmailListItem(to, subject, email, from, "SentItems");
+        sentItemsEntry.setUnread(false);
         emailListItemRepository.save(sentItemsEntry);
     }
 

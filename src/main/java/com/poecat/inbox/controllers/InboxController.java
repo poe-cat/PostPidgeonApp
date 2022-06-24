@@ -3,9 +3,7 @@ package com.poecat.inbox.controllers;
 import com.datastax.oss.driver.api.core.uuid.Uuids;
 import com.poecat.inbox.emaillist.EmailListItem;
 import com.poecat.inbox.emaillist.EmailListItemRepository;
-import com.poecat.inbox.folders.Folder;
-import com.poecat.inbox.folders.FolderRepository;
-import com.poecat.inbox.folders.FolderService;
+import com.poecat.inbox.folders.*;
 import org.ocpsoft.prettytime.PrettyTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -47,6 +45,7 @@ public class InboxController {
 
         List<Folder> defaultFolders = folderService.fetchDefaultFolders(userId);
         model.addAttribute("defaultFolders", defaultFolders);
+        model.addAttribute("stats", folderService.mapCountToLabels(userId));
 
         // Fetch messages
         if(!StringUtils.hasText(folder)) {
