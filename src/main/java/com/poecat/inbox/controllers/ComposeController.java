@@ -1,5 +1,6 @@
 package com.poecat.inbox.controllers;
 
+import com.poecat.inbox.email.EmailRepository;
 import com.poecat.inbox.email.EmailService;
 import com.poecat.inbox.folders.Folder;
 import com.poecat.inbox.folders.FolderRepository;
@@ -14,9 +15,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -28,31 +27,30 @@ public class ComposeController {
     private FolderService folderService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private EmailRepository emailRepository;
 
 
     @GetMapping(value = "/compose")
-    public String getComposePage(@RequestParam(required = false) String to,
-            @AuthenticationPrincipal OAuth2User principal, Model model) {
+    public String getComposePage(@RequestParam(required = false) String to, @RequestParam(required = false) String replayToEmailId, @AuthenticationPrincipal OAuth2User principal, Model model) {
 
-        if (principal == null || !StringUtils.hasText(principal.getAttribute("login"))) {
-            return "index";
+        if (principal != null && principal.getAttribute("login") != null) {
+            String loginId = principal.getAttribute("login");
+            List<Folder> folders = folderRepository.findAllById(loginId);
+            List<Folder> initFolders = folderService.init(loginId);
+            // initFolders.stream().forEach(folderRepository::save);
+            model.addAttribute("defaultFolders", initFolders);
+            model.addAttribute("userName", principal.getAttribute("name"));
+
+            if (folders.size() > 0) {
+                model.addAttribute("userFolders", folders);
+            }
+            Map<String, Integer> folderToUnreadCounts = folderService.getUnreadCountsMap(loginId);
+            model.addAttribute("folderToUnreadCounts", folderToUnreadCounts);
+
+            return "compose-page";
         }
-
-        // Fetch folders
-        String userId = principal.getAttribute("login");
-        List<Folder> userFolders = folderRepository.findAllById(userId);
-        model.addAttribute("userFolders", userFolders);
-
-        List<Folder> defaultFolders = folderService.fetchDefaultFolders(userId);
-        model.addAttribute("defaultFolders", defaultFolders);
-
-        model.addAttribute("userName", principal.getAttribute("name"));
-        model.addAttribute("stats", folderService.mapCountToLabels(userId));
-
-        List<String> uniqueToIds = splitIds(to);
-        model.addAttribute("toIds", String.join(", ", uniqueToIds));
-
-        return "compose-page";
+        return "index";
     }
 
     private List<String> splitIds(String to) {
@@ -71,18 +69,22 @@ public class ComposeController {
     }
 
 
-    @PostMapping("/sendEmail")
-    public ModelAndView sendEmail(@RequestBody MultiValueMap<String, String> formData,
-                                  @AuthenticationPrincipal OAuth2User principal) {
-
-        if (principal == null || !StringUtils.hasText(principal.getAttribute("login"))) {
-            return new ModelAndView("redirect:/");
+    @PostMapping(value = "/sendEmail")
+    public ModelAndView sendEmail(
+            @RequestBody MultiValueMap<String, String> formData,
+            @AuthenticationPrincipal OAuth2User principal
+    ) {
+        if (principal == null || principal.getAttribute("login") == null) {
+            return null;
         }
-        String from = principal.getAttribute("login");
-        List<String> toIds = splitIds(formData.getFirst("toIds"));
+        String toIds = formData.getFirst("toIds");
         String subject = formData.getFirst("subject");
         String body = formData.getFirst("body");
+        String from = principal.getAttribute("login");
+
         emailService.sendEmail(from, toIds, subject, body);
+
+
 
         return new ModelAndView("redirect:/");
     }

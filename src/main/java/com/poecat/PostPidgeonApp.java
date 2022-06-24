@@ -47,12 +47,10 @@ public class PostPidgeonApp {
 
 	@PostConstruct
 	public void init() {
-		folderRepository.save(new Folder("poe-cat", "Work", "blue"));
-		folderRepository.save(new Folder("poe-cat", "Entertainment", "green"));
-		folderRepository.save(new Folder("poe-cat", "Family", "yellow"));
+
 
 		for(int i = 0; i < 10; i++) {
-			emailService.sendEmail("poe-cat", Arrays.asList("poe-cat", "abc"), "Hello " + i, "body");
+			emailService.sendEmail("poe-cat", "poe-cat", "Hello " + i, "body");
 		}
 	}
 }

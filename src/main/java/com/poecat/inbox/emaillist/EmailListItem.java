@@ -13,6 +13,9 @@ public class EmailListItem {
     @PrimaryKey
     private EmailListItemKey key;
 
+    @CassandraType(type = CassandraType.Name.TEXT)
+    private String from;
+
     @CassandraType(type = CassandraType.Name.LIST, typeArguments = CassandraType.Name.TEXT)
     private List<String> to;
 
@@ -20,7 +23,7 @@ public class EmailListItem {
     private String subject;
 
     @CassandraType(type = CassandraType.Name.BOOLEAN)
-    private boolean isUnread;
+    private boolean isRead;
 
     @Transient
     private String agoTimeString;
@@ -32,6 +35,14 @@ public class EmailListItem {
 
     public void setKey(EmailListItemKey key) {
         this.key = key;
+    }
+
+    public String getFrom() {
+        return from;
+    }
+
+    public void setFrom(String from) {
+        this.from = from;
     }
 
     public List<String> getTo() {
@@ -50,12 +61,12 @@ public class EmailListItem {
         this.subject = subject;
     }
 
-    public boolean isUnread() {
-        return isUnread;
+    public boolean isRead() {
+        return isRead;
     }
 
-    public void setUnread(boolean unread) {
-        isUnread = unread;
+    public void setRead(boolean read) {
+        isRead = read;
     }
 
     public String getAgoTimeString() {

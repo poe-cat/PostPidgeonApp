@@ -7,8 +7,12 @@ import com.poecat.inbox.emaillist.EmailListItemRepository;
 import com.poecat.inbox.folders.UnreadEmailStatsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class EmailService {
@@ -20,41 +24,52 @@ public class EmailService {
     @Autowired
     private UnreadEmailStatsRepository unreadEmailStatsRepository;
 
-    public void sendEmail(String from, List<String> to, String subject, String body) {
+    public void sendEmail(String fromUserId, String toUserIds, String subject, String body) {
 
-        Email email = new Email();
-        email.setTo(to);
-        email.setFrom(from);
-        email.setSubject(subject);
-        email.setBody(body);
-        email.setId(Uuids.timeBased());
-        emailRepository.save(email);
+        UUID timeUuid = Uuids.timeBased();
 
-        to.forEach(toId -> {
-            EmailListItem item = createEmailListItem(to, subject, email, toId, "Inbox");
-            emailListItemRepository.save(item);
-            unreadEmailStatsRepository.incrementUnreadCount(toId, "Inbox");
+        List<String> toUserIdList = Arrays.asList(toUserIds.split(",")).stream()
+                .map(id -> StringUtils.trimWhitespace(id)).filter(id -> StringUtils.hasText(id))
+                .collect(Collectors.toList());
+
+        // Add to sent items of sender
+        EmailListItem sentItemEntry = prepareEmailsListEntry("Sent", fromUserId, fromUserId, toUserIdList, subject,
+                timeUuid);
+        sentItemEntry.setRead(true);
+        emailListItemRepository.save(sentItemEntry);
+
+        // Add to inbox of each reciever
+        toUserIdList.stream().forEach(toUserId -> {
+            EmailListItem inboxEntry = prepareEmailsListEntry("Inbox", toUserId, fromUserId, toUserIdList, subject,
+                    timeUuid);
+            inboxEntry.setRead(false);
+            emailListItemRepository.save(inboxEntry);
+            unreadEmailStatsRepository.incrementUnreadCount(toUserId, "Inbox");
         });
 
-        EmailListItem sentItemsEntry = createEmailListItem(to, subject, email, from, "Sent items");
-        sentItemsEntry.setUnread(false);
-        emailListItemRepository.save(sentItemsEntry);
+        // Save email entity
+        Email email = new Email();
+        email.setId(timeUuid);
+        email.setFrom(fromUserId);
+        email.setTo(toUserIdList);
+        email.setSubject(subject);
+        email.setBody(body);
+        emailRepository.save(email);
+
     }
 
-
-    private EmailListItem createEmailListItem(List<String> to, String subject,
-                                              Email email, String itemOwner, String folderName) {
+    private EmailListItem prepareEmailsListEntry(String folderName, String forUser, String fromUserId,
+                                              List<String> toUserIds, String subject, UUID timeUuid) {
 
         EmailListItemKey key = new EmailListItemKey();
-        key.setId(itemOwner);
         key.setLabel(folderName);
-        key.setTimeUUID(email.getId());
-
-        EmailListItem item = new EmailListItem();
-        item.setKey(key);
-        item.setTo(to);
-        item.setSubject(subject);
-        item.setUnread(true);
-        return item;
+        key.setId(forUser);
+        key.setTimeUUID(timeUuid);
+        EmailListItem emailsListEntry = new EmailListItem();
+        emailsListEntry.setKey(key);
+        emailsListEntry.setFrom(fromUserId);
+        emailsListEntry.setTo(toUserIds);
+        emailsListEntry.setSubject(subject);
+        return emailsListEntry;
     }
 }

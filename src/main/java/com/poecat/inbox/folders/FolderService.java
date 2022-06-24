@@ -14,17 +14,23 @@ public class FolderService {
     @Autowired
     private UnreadEmailStatsRepository unreadEmailStatsRepository;
 
-    public List<Folder> fetchDefaultFolders(String userId) {
-        return Arrays.asList(
+    public List<Folder> init(String userId) {
+        var defaultFolders = Arrays.asList(
                 new Folder(userId, "Inbox", "blue"),
-                new Folder(userId, "Sent items", "green"),
-                new Folder(userId, "Important", "red")
+                new Folder(userId, "Sent", "purple"),
+                new Folder(userId, "Important", "red"),
+                new Folder(userId, "Done", "green")
         );
+        // for (int i = 0; i < defaultFolders.size(); i++) {
+        //     defaultFolders.get(i).setCreatedTimeUuid(Uuids.timeBased());
+        // }
+        return defaultFolders;
     }
 
-    public Map<String, Integer> mapCountToLabels(String userId) {
-        List<UnreadEmailStats> stats = unreadEmailStatsRepository.findAllById(userId);
-
-        return stats.stream().collect(Collectors.toMap(UnreadEmailStats::getLabel, UnreadEmailStats::getUnreadCount));
+    public Map<String, Integer> getUnreadCountsMap(String loginId) {
+        List<UnreadEmailStats> unreadStats = unreadEmailStatsRepository.findAllById(loginId);
+        Map<String, Integer> folderToUnreadCounts = unreadStats.stream()
+                .collect(Collectors.toMap(UnreadEmailStats::getLabel, UnreadEmailStats::getUnreadCount));
+        return folderToUnreadCounts;
     }
 }
