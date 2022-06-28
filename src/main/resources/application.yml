@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: PostPidgeonApp
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            client-id: Iv1.efa0bf2206f34447
+            client-secret: b65b46b2716b4197958eef8a648e1e8460d30486
+  data:
+    cassandra:
+      keyspace-name: main
+      username: JUhajRxZGNHeksWsRyGbEJQA
+      password: PawquIo0CS9+LPYO6,6yh9_pckYN0Xqz.LRzyb4l_4aFEAvZWo4Zu8E+QTIYj_-.lc+7rqhzzl+eMZftUbdfc7ZQCxDaoyoHv4g8XTGRRwSfjZ.6Z7KA2JySBZJ1XTFI
+      schema-action: recreate-drop-unused
+      request:
+        timeout: 10s
+      connection:
+        connect-timeout: 10s
+        init-query-timeout: 10s
+
+astra.db:
+  id: 36a8157c-1460-4347-a602-c35eb0fff13c-1
+  region: europe-west1
+  keyspace: main
+  application.token: AstraCS:JUhajRxZGNHeksWsRyGbEJQA:53416b0a3112805f6e9c015ddc9522ae727d908643d1eab83ba0de88de53c814
+
+datastax.astra:
+  secure-connect-bundle: secure-connect.zip
